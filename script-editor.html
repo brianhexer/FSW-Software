@@ -240,8 +240,25 @@
             transition: all 0.2s ease;
         }
 
+        .automation-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+            color: #f8fafc;
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
+            backdrop-filter: blur(10px);
+        }
+
         .automation-action:hover {
-            background: rgba(125, 211, 252, 0.22);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.12);
+            background: linear-gradient(180deg, rgba(56,189,248,0.08), rgba(59,130,246,0.04));
         }
         
         .format-badge {
@@ -287,13 +304,16 @@
         }
         
         .button-base {
-            padding: 8px 16px;
-            border-radius: 9999px;
-            font-size: 12px;
-            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            transition: transform 0.14s ease, box-shadow 0.14s ease;
+            border: 1px solid rgba(255, 255, 255, 0.12);
             backdrop-filter: blur(14px) saturate(1.2);
         }
         
@@ -303,8 +323,8 @@
         }
         
         .button-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 24px rgba(56, 189, 248, 0.25);
+            transform: translateY(-4px);
+            box-shadow: 0 18px 44px rgba(56, 189, 248, 0.22);
         }
         
         .button-secondary {
@@ -313,7 +333,8 @@
         }
         
         .button-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.16);
+            transform: translateY(-2px);
         }
         
         .button-danger {
@@ -322,8 +343,8 @@
         }
         
         .button-danger:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 24px rgba(239, 68, 68, 0.22);
+            transform: translateY(-4px);
+            box-shadow: 0 18px 44px rgba(239, 68, 68, 0.18);
         }
         
         .toast {
@@ -702,7 +723,7 @@
                     character.toLowerCase().includes(currentCharacterDraft.toLowerCase())
                 )
                 : characters;
-            const showCharacterSuggestionsPanel = characters.length > 0;
+            const showCharacterSuggestionsPanel = showCharacterSuggestions && characters.length > 0;
 
             // ================================================================
             // STORAGE & PERSISTENCE
@@ -768,14 +789,25 @@
                 const editor = editorRef.current;
                 if (!editor) return;
 
-                const text = editor.value;
+                const text = editor.value || '';
                 const insertValue = character.toUpperCase();
-                const lines = text.split('\n');
-                lines[lines.length - 1] = insertValue;
-                const newContent = lines.join('\n');
 
+                // Determine the line at the current cursor position and replace it.
+                const cursorPos = editor.selectionStart || text.length;
+                const lineStart = text.lastIndexOf('\n', Math.max(0, cursorPos - 1)) + 1;
+                const nextNewline = text.indexOf('\n', cursorPos);
+                const lineEnd = nextNewline === -1 ? text.length : nextNewline;
+
+                const before = text.substring(0, lineStart);
+                const after = text.substring(lineEnd);
+
+                const newContent = before + insertValue + after;
+
+                // Apply changes and place caret after the inserted character name
                 editor.value = newContent;
-                editor.selectionStart = editor.selectionEnd = newContent.length;
+                const caretPos = before.length + insertValue.length;
+                editor.selectionStart = editor.selectionEnd = caretPos;
+
                 setScriptContent(newContent);
                 setIsDirty(true);
                 setSelectedFormat(FORMAT_TYPES.CHARACTER);
@@ -1206,7 +1238,7 @@
                                                     <button
                                                         key={character}
                                                         type="button"
-                                                        className={`w-full text-left px-3 py-2 text-sm border-b border-white/5 last:border-b-0 ${
+                                                        className={`character-suggestion w-full text-left px-3 py-2 text-sm border-b border-white/5 last:border-b-0 ${
                                                             index === activeSuggestionIndex ? 'bg-sky-300/20 text-sky-50' : 'bg-transparent text-sky-50/80'
                                                         }`}
                                                         onMouseDown={(event) => {
