@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Film Script Writer - Professional Screenwriting Tool</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+        
+        * {
+            font-family: 'Courier Prime', monospace;
+        }
+        
+        .script-editor {
+            font-family: 'Courier Prime', monospace;
+            font-size: 12pt;
+            line-height: 1.5;
+            background: #f5f5f5;
+        }
+        
+        .script-line {
+            position: relative;
+            min-height: 1.5em;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .line-number {
+            display: inline-block;
+            width: 40px;
+            text-align: right;
+            color: #999;
+            margin-right: 20px;
+            user-select: none;
+            padding-right: 10px;
+        }
+        
+        .format-indicator {
+            position: absolute;
+            left: 5px;
+            color: #0066cc;
+            font-size: 9px;
+            opacity: 0.6;
+        }
+        
+        .scene-heading {
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        
+        .action {
+            margin-bottom: 0.5em;
+        }
+        
+        .character {
+            text-transform: uppercase;
+            margin-top: 0.5em;
+            margin-bottom: 0;
+            font-weight: bold;
+        }
+        
+        .parenthetical {
+            margin-left: 2.5cm;
+            margin-bottom: 0;
+        }
+        
+        .dialogue {
+            margin-left: 1.8cm;
+            margin-bottom: 0;
+        }
+        
+        .transition {
+            text-align: right;
+            text-transform: uppercase;
+            margin-top: 0.5em;
+            font-weight: bold;
+        }
+        
+        .editor-textarea {
+            font-family: 'Courier Prime', monospace;
+            font-size: 12pt;
+            line-height: 1.5;
+            resize: none;
+            background: white;
+            border: none;
+            padding: 40px 20px;
+        }
+        
+        .editor-textarea:focus {
+            outline: none;
+            background: white;
+        }
+        
+        .sidebar {
+            background: #2d3748;
+            color: #e2e8f0;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+        
+        .scene-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .scene-item:hover {
+            background: #4a5568;
+            border-left-color: #0066cc;
+        }
+        
+        .scene-item.active {
+            background: #4a5568;
+            border-left-color: #fbbf24;
+        }
+        
+        .character-suggestion {
+            padding: 8px 12px;
+            cursor: pointer;
+            background: #f0f4f8;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.2s;
+        }
+        
+        .character-suggestion:hover {
+            background: #e8ecf1;
+        }
+        
+        .format-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .format-badge.scene {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .format-badge.action {
+            background: #fecaca;
+            color: #991b1b;
+        }
+        
+        .format-badge.character {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .format-badge.dialogue {
+            background: #fcd34d;
+            color: #78350f;
+        }
+        
+        .format-badge.parenthetical {
+            background: #e9d5ff;
+            color: #581c87;
+        }
+        
+        .stats-bar {
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            padding: 12px 20px;
+            font-size: 11px;
+            color: #6c757d;
+        }
+        
+        .button-base {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        
+        .button-primary {
+            background: #0066cc;
+            color: white;
+        }
+        
+        .button-primary:hover {
+            background: #0052a3;
+        }
+        
+        .button-secondary {
+            background: #e9ecef;
+            color: #495057;
+        }
+        
+        .button-secondary:hover {
+            background: #dee2e6;
+        }
+        
+        .button-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .button-danger:hover {
+            background: #c82333;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2d3748;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease-out;
+            z-index: 1000;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            color: #1a202c;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-family: 'Courier Prime', monospace;
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .modal-input:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+        
+        .pdf-page {
+            width: 8.5in;
+            height: 11in;
+            padding: 1in;
+            background: white;
+            margin: 0 auto;
+            font-family: 'Courier Prime', monospace;
+            font-size: 12pt;
+            line-height: 1.5;
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script>
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        // ============================================================================
+        // SCRIPT FORMATTING UTILITIES
+        // ============================================================================
+
+        const FORMAT_TYPES = {
+            SCENE_HEADING: 'scene-heading',
+            ACTION: 'action',
+            CHARACTER: 'character',
+            PARENTHETICAL: 'parenthetical',
+            DIALOGUE: 'dialogue',
+            TRANSITION: 'transition',
+        };
+
+        const detectFormat = (text, previousFormat) => {
+            if (!text.trim()) return FORMAT_TYPES.ACTION;
+            
+            const trimmed = text.trim().toUpperCase();
+            
+            // Scene Heading detection
+            if (
+                trimmed.match(/^(INT\.|EXT\.|INT\/EXT\.|I\/E\.)/) ||
+                trimmed.match(/^(INT|EXT|INT\/EXT|I\/E) /) ||
+                (previousFormat !== FORMAT_TYPES.DIALOGUE && trimmed.match(/^\w+\s*[-–]\s*(DAY|NIGHT|DAWN|DUSK|CONTINUOUS|MORNING|AFTERNOON|EVENING)/i))
+            ) {
+                return FORMAT_TYPES.SCENE_HEADING;
+            }
+            
+            // Transition detection (ends with TO:)
+            if (trimmed.endsWith('TO:')) {
+                return FORMAT_TYPES.TRANSITION;
+            }
+            
+            // Parenthetical detection (surrounded by parentheses)
+            if (trimmed.startsWith('(') && trimmed.endsWith(')')) {
+                return FORMAT_TYPES.PARENTHETICAL;
+            }
+            
+            // After dialogue, next non-empty should be character or action
+            if (previousFormat === FORMAT_TYPES.DIALOGUE) {
+                // If all caps and relatively short, likely character
+                if (text === text.toUpperCase() && text.length > 0 && text.length < 40) {
+                    return FORMAT_TYPES.CHARACTER;
+                }
+                return FORMAT_TYPES.ACTION;
+            }
+            
+            // After character, should be dialogue or parenthetical
+            if (previousFormat === FORMAT_TYPES.CHARACTER) {
+                if (trimmed.startsWith('(') && trimmed.endsWith(')')) {
+                    return FORMAT_TYPES.PARENTHETICAL;
+                }
+                return FORMAT_TYPES.DIALOGUE;
+            }
+            
+            // After parenthetical, should be dialogue
+            if (previousFormat === FORMAT_TYPES.PARENTHETICAL) {
+                return FORMAT_TYPES.DIALOGUE;
+            }
+            
+            // All caps and short = likely character
+            if (text === text.toUpperCase() && text.length > 0 && text.length < 40 && text.trim().match(/^[A-Z\s\-]+$/)) {
+                return FORMAT_TYPES.CHARACTER;
+            }
+            
+            return FORMAT_TYPES.ACTION;
+        };
+
+        const applyFormatting = (text, format) => {
+            switch (format) {
+                case FORMAT_TYPES.SCENE_HEADING:
+                    return text.toUpperCase();
+                case FORMAT_TYPES.CHARACTER:
+                    return text.toUpperCase().trim();
+                case FORMAT_TYPES.ACTION:
+                case FORMAT_TYPES.DIALOGUE:
+                case FORMAT_TYPES.PARENTHETICAL:
+                case FORMAT_TYPES.TRANSITION:
+                default:
+                    return text;
+            }
+        };
+
+        const getIndentation = (format) => {
+            switch (format) {
+                case FORMAT_TYPES.SCENE_HEADING:
+                    return 0;
+                case FORMAT_TYPES.ACTION:
+                    return 0;
+                case FORMAT_TYPES.CHARACTER:
+                    return 3.7; // inches
+                case FORMAT_TYPES.DIALOGUE:
+                    return 1.5; // inches
+                case FORMAT_TYPES.PARENTHETICAL:
+                    return 2.2; // inches
+                case FORMAT_TYPES.TRANSITION:
+                    return 0;
+                default:
+                    return 0;
+            }
+        };
+
+        // ============================================================================
+        // SCRIPT PARSER & ANALYZER
+        // ============================================================================
+
+        const parseScript = (text) => {
+            const lines = text.split('\n');
+            const parsed = [];
+            let previousFormat = FORMAT_TYPES.ACTION;
+
+            lines.forEach((line, index) => {
+                const format = detectFormat(line, previousFormat);
+                const formatted = applyFormatting(line, format);
+                
+                parsed.push({
+                    index,
+                    original: line,
+                    formatted,
+                    format,
+                    characters: extractCharactersFromLine(line, format),
+                });
+
+                if (format !== FORMAT_TYPES.DIALOGUE && format !== FORMAT_TYPES.PARENTHETICAL) {
+                    previousFormat = format;
+                }
+            });
+
+            return parsed;
+        };
+
+        const extractCharactersFromLine = (line, format) => {
+            if (format === FORMAT_TYPES.CHARACTER) {
+                return [line.trim()];
+            }
+            return [];
+        };
+
+        const extractScenes = (parsed) => {
+            return parsed
+                .filter(line => line.format === FORMAT_TYPES.SCENE_HEADING)
+                .map((line, idx) => ({
+                    index: line.index,
+                    heading: line.formatted,
+                    lineNumber: idx + 1,
+                }));
+        };
+
+        const extractCharacters = (parsed) => {
+            const seen = new Set();
+            const characters = [];
+            parsed.forEach(line => {
+                if (line.format === FORMAT_TYPES.CHARACTER) {
+                    const char = line.formatted;
+                    if (!seen.has(char)) {
+                        seen.add(char);
+                        characters.push(char);
+                    }
+                }
+            });
+            return characters;
+        };
+
+        const getScriptStats = (parsed) => {
+            return {
+                pages: Math.ceil((parsed.length * 12) / 55), // Rough estimate
+                lines: parsed.length,
+                scenes: parsed.filter(l => l.format === FORMAT_TYPES.SCENE_HEADING).length,
+                characters: new Set(
+                    parsed.filter(l => l.format === FORMAT_TYPES.CHARACTER).map(l => l.formatted)
+                ).size,
+            };
+        };
+
+        // ============================================================================
+        // SCENE NAVIGATOR COMPONENT
+        // ============================================================================
+
+        const SceneNavigator = ({ scenes, onSceneClick, currentLineIndex }) => {
+            return (
+                <div className="sidebar w-64 flex flex-col">
+                    <div className="p-4 border-b border-gray-600">
+                        <h2 className="text-sm font-bold uppercase tracking-wide">Scenes</h2>
+                    </div>
+                    <div className="flex-1 overflow-y-auto">
+                        {scenes.length === 0 ? (
+                            <div className="p-4 text-xs text-gray-500">No scenes yet</div>
+                        ) : (
+                            scenes.map((scene) => (
+                                <div
+                                    key={scene.index}
+                                    className={`scene-item text-xs ${
+                                        currentLineIndex >= scene.index ? 'active' : ''
+                                    }`}
+                                    onClick={() => onSceneClick(scene.index)}
+                                >
+                                    <span className="font-bold text-yellow-400 mr-2">
+                                        #{scene.lineNumber}
+                                    </span>
+                                    <span className="truncate">{scene.heading}</span>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // ============================================================================
+        // CHARACTER SUGGESTIONS DROPDOWN
+        // ============================================================================
+
+        const CharacterSuggestions = ({ characters, filter, onSelect, visible }) => {
+            if (!visible || !filter.trim()) return null;
+
+            const filtered = characters.filter(char =>
+                char.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            if (filtered.length === 0) return null;
+
+            return (
+                <div className="absolute bottom-full left-0 right-0 bg-white border border-gray-300 rounded-t-lg shadow-lg z-50">
+                    {filtered.slice(0, 5).map(char => (
+                        <div
+                            key={char}
+                            className="character-suggestion"
+                            onClick={() => onSelect(char)}
+                        >
+                            {char}
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        // ============================================================================
+        // MAIN SCRIPT EDITOR COMPONENT
+        // ============================================================================
+
+        const ScriptEditor = () => {
+            const [scriptContent, setScriptContent] = useState('');
+            const [title, setTitle] = useState('Untitled Script');
+            const [isDirty, setIsDirty] = useState(false);
+            const [showSaveModal, setShowSaveModal] = useState(false);
+            const [toast, setToast] = useState(null);
+            const [selectedFormat, setSelectedFormat] = useState(FORMAT_TYPES.ACTION);
+            const editorRef = useRef(null);
+            const cursorPositionRef = useRef(0);
+
+            // Parse script data
+            const parsed = parseScript(scriptContent);
+            const scenes = extractScenes(parsed);
+            const characters = extractCharacters(parsed);
+            const stats = getScriptStats(parsed);
+
+            // ================================================================
+            // STORAGE & PERSISTENCE
+            // ================================================================
+
+            useEffect(() => {
+                const saved = localStorage.getItem('filmScriptData');
+                if (saved) {
+                    try {
+                        const { content, title: savedTitle } = JSON.parse(saved);
+                        setScriptContent(content);
+                        setTitle(savedTitle);
+                    } catch (e) {
+                        console.error('Failed to load saved script:', e);
+                    }
+                }
+            }, []);
+
+            useEffect(() => {
+                if (isDirty) {
+                    const timer = setTimeout(() => {
+                        localStorage.setItem(
+                            'filmScriptData',
+                            JSON.stringify({ content: scriptContent, title })
+                        );
+                        showToast('Script auto-saved');
+                        setIsDirty(false);
+                    }, 2000);
+
+                    return () => clearTimeout(timer);
+                }
+            }, [scriptContent, title, isDirty]);
+
+            // ================================================================
+            // KEYBOARD SHORTCUTS & SMART FORMATTING
+            // ================================================================
+
+            const handleKeyDown = (e) => {
+                const editor = editorRef.current;
+                if (!editor) return;
+
+                const cursorPos = editor.selectionStart;
+                const text = editor.value;
+                const textBeforeCursor = text.substring(0, cursorPos);
+                const lines = textBeforeCursor.split('\n');
+                const currentLineIndex = lines.length - 1;
+                const currentLine = lines[currentLineIndex];
+                const currentLineStart = textBeforeCursor.length - currentLine.length;
+
+                // TAB: Insert smart indentation or next element
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const format = detectFormat(currentLine, selectedFormat);
+                    
+                    if (format === FORMAT_TYPES.CHARACTER) {
+                        // After character, go to parenthetical or dialogue
+                        const newFormat = FORMAT_TYPES.DIALOGUE;
+                        const indent = ' '.repeat(Math.ceil(getIndentation(newFormat) * 4));
+                        editor.value = 
+                            text.substring(0, cursorPos) + 
+                            indent + 
+                            text.substring(cursorPos);
+                        editor.selectionStart = editor.selectionEnd = cursorPos + indent.length;
+                    } else {
+                        // Normal tab behavior
+                        const indent = '    ';
+                        editor.value = 
+                            text.substring(0, cursorPos) + 
+                            indent + 
+                            text.substring(cursorPos);
+                        editor.selectionStart = editor.selectionEnd = cursorPos + indent.length;
+                    }
+                    setScriptContent(editor.value);
+                    return;
+                }
+
+                // ENTER: Smart line break with format detection
+                if (e.key === 'Enter') {
+                    const format = detectFormat(currentLine, selectedFormat);
+                    
+                    if (format === FORMAT_TYPES.CHARACTER) {
+                        // After character name, next line should be dialogue
+                        e.preventDefault();
+                        const dialogueIndent = ' '.repeat(Math.ceil(getIndentation(FORMAT_TYPES.DIALOGUE) * 4));
+                        const newContent = 
+                            text.substring(0, cursorPos) + 
+                            '\n' + dialogueIndent +
+                            text.substring(cursorPos);
+                        editor.value = newContent;
+                        editor.selectionStart = editor.selectionEnd = cursorPos + 1 + dialogueIndent.length;
+                        setScriptContent(newContent);
+                        setSelectedFormat(FORMAT_TYPES.DIALOGUE);
+                        return;
+                    }
+
+                    if (format === FORMAT_TYPES.DIALOGUE || format === FORMAT_TYPES.PARENTHETICAL) {
+                        // Track that we're in dialogue mode for next format detection
+                        setSelectedFormat(format);
+                    } else {
+                        setSelectedFormat(FORMAT_TYPES.ACTION);
+                    }
+                }
+
+                // CTRL+SHIFT+S: Open save dialog
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'S') {
+                    e.preventDefault();
+                    setShowSaveModal(true);
+                }
+
+                // CTRL+P: Export to PDF
+                if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                    e.preventDefault();
+                    exportToPDF();
+                }
+            };
+
+            const handleChange = (e) => {
+                setScriptContent(e.target.value);
+                setIsDirty(true);
+                cursorPositionRef.current = e.target.selectionStart;
+            };
+
+            // ================================================================
+            // SCENE NAVIGATION
+            // ================================================================
+
+            const handleSceneClick = (lineIndex) => {
+                if (editorRef.current) {
+                    const lines = scriptContent.split('\n');
+                    let charPosition = 0;
+                    for (let i = 0; i < lineIndex && i < lines.length; i++) {
+                        charPosition += lines[i].length + 1; // +1 for newline
+                    }
+                    editorRef.current.focus();
+                    editorRef.current.setSelectionRange(charPosition, charPosition);
+                }
+            };
+
+            // ================================================================
+            // PDF EXPORT
+            // ================================================================
+
+            const exportToPDF = () => {
+                const element = document.createElement('div');
+                element.className = 'pdf-page';
+                
+                let htmlContent = `<h1 style="text-align: center; margin-bottom: 2em; font-weight: bold; font-size: 16pt;">${escapeHtml(title)}</h1>`;
+                
+                const lines = scriptContent.split('\n');
+                let previousFormat = FORMAT_TYPES.ACTION;
+                
+                lines.forEach(line => {
+                    const format = detectFormat(line, previousFormat);
+                    const formatted = applyFormatting(line, format);
+                    const indent = getIndentation(format);
+                    
+                    let htmlLine = escapeHtml(formatted) || '&nbsp;';
+                    let style = `margin-left: ${indent}in; margin-bottom: 0;`;
+                    
+                    switch (format) {
+                        case FORMAT_TYPES.SCENE_HEADING:
+                            style += ' font-weight: bold; margin-top: 1.5em; margin-bottom: 0.5em;';
+                            break;
+                        case FORMAT_TYPES.ACTION:
+                            style += ' margin-bottom: 0.5em;';
+                            break;
+                        case FORMAT_TYPES.CHARACTER:
+                            style += ' font-weight: bold; margin-top: 0.5em; margin-bottom: 0;';
+                            break;
+                        case FORMAT_TYPES.DIALOGUE:
+                            style += ' margin-bottom: 0;';
+                            break;
+                        case FORMAT_TYPES.PARENTHETICAL:
+                            style += ' margin-bottom: 0;';
+                            break;
+                        case FORMAT_TYPES.TRANSITION:
+                            style += ' font-weight: bold; text-align: right; margin-top: 0.5em;';
+                            break;
+                    }
+                    
+                    htmlContent += `<p style="${style}">${htmlLine}</p>`;
+                    
+                    if (format !== FORMAT_TYPES.DIALOGUE && format !== FORMAT_TYPES.PARENTHETICAL) {
+                        previousFormat = format;
+                    }
+                });
+                
+                element.innerHTML = htmlContent;
+                
+                const opt = {
+                    margin: [0.5, 0.5, 0.5, 0.5],
+                    filename: `${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+                };
+                
+                html2pdf().set(opt).from(element).save();
+                showToast('PDF exported successfully');
+            };
+
+            const escapeHtml = (text) => {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;',
+                };
+                return text.replace(/[&<>"']/g, m => map[m]);
+            };
+
+            // ================================================================
+            // UI HELPERS
+            // ================================================================
+
+            const showToast = (message) => {
+                setToast(message);
+                setTimeout(() => setToast(null), 3000);
+            };
+
+            const handleNewScript = () => {
+                if (scriptContent.trim() && !confirm('Clear current script? (Auto-saved version will be preserved)')) {
+                    return;
+                }
+                setScriptContent('');
+                setTitle('Untitled Script');
+                setSelectedFormat(FORMAT_TYPES.ACTION);
+                showToast('New script created');
+            };
+
+            const handleSaveTitle = (newTitle) => {
+                setTitle(newTitle);
+                localStorage.setItem(
+                    'filmScriptData',
+                    JSON.stringify({ content: scriptContent, title: newTitle })
+                );
+                showToast(`Saved as "${newTitle}"`);
+                setShowSaveModal(false);
+            };
+
+            const currentSceneIndex = scenes.length > 0 
+                ? scenes.reduce((prev, scene) => {
+                    return cursorPositionRef.current >= scene.index ? scene.index : prev;
+                }, scenes[0]?.index || 0)
+                : 0;
+
+            // ================================================================
+            // RENDER
+            // ================================================================
+
+            return (
+                <div className="flex h-screen bg-gray-100">
+                    {/* Scene Navigator Sidebar */}
+                    <SceneNavigator
+                        scenes={scenes}
+                        onSceneClick={handleSceneClick}
+                        currentLineIndex={currentSceneIndex}
+                    />
+
+                    {/* Main Content Area */}
+                    <div className="flex-1 flex flex-col">
+                        {/* Header */}
+                        <div className="bg-white border-b border-gray-300 px-6 py-4 flex items-center justify-between shadow-sm">
+                            <div className="flex items-center gap-4">
+                                <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
+                                <span className="text-xs text-gray-500 px-2 py-1 bg-gray-100 rounded">
+                                    {isDirty ? 'Editing...' : 'Saved'}
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    className="button-base button-secondary"
+                                    onClick={() => setShowSaveModal(true)}
+                                    title="Ctrl+Shift+S"
+                                >
+                                    Save As
+                                </button>
+                                <button
+                                    className="button-base button-primary"
+                                    onClick={exportToPDF}
+                                    title="Ctrl+P"
+                                >
+                                    Export PDF
+                                </button>
+                                <button
+                                    className="button-base button-danger"
+                                    onClick={handleNewScript}
+                                >
+                                    New
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Editor Area */}
+                        <div className="flex-1 overflow-hidden">
+                            <textarea
+                                ref={editorRef}
+                                value={scriptContent}
+                                onChange={handleChange}
+                                onKeyDown={handleKeyDown}
+                                className="editor-textarea w-full h-full"
+                                placeholder="Start writing your script here...&#10;&#10;Tips:&#10;• Type INT. or EXT. to start a scene heading&#10;• Character names in ALL CAPS&#10;• Press Enter after character to auto-format dialogue&#10;• Use Tab for smart indentation&#10;• Ctrl+P to export PDF&#10;• Ctrl+Shift+S to save with title"
+                                spellCheck="false"
+                            />
+                        </div>
+
+                        {/* Statistics Footer */}
+                        <div className="stats-bar flex items-center justify-between">
+                            <div className="flex gap-6">
+                                <span>📄 Pages: ~{stats.pages}</span>
+                                <span>📍 Scenes: {stats.scenes}</span>
+                                <span>👥 Characters: {stats.characters}</span>
+                                <span>📝 Lines: {stats.lines}</span>
+                            </div>
+                            <div className="text-xs text-gray-500">
+                                Press Tab or Enter for smart formatting • Ctrl+P to export • Ctrl+Shift+S to save
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Save Modal */}
+                    {showSaveModal && (
+                        <div className="modal-overlay" onClick={() => setShowSaveModal(false)}>
+                            <div className="modal" onClick={e => e.stopPropagation()}>
+                                <div className="modal-title">Save Script</div>
+                                <input
+                                    type="text"
+                                    className="modal-input"
+                                    placeholder="Script Title"
+                                    defaultValue={title}
+                                    autoFocus
+                                    onKeyPress={(e) => {
+                                        if (e.key === 'Enter') {
+                                            handleSaveTitle(e.target.value);
+                                        }
+                                    }}
+                                />
+                                <div className="flex gap-3">
+                                    <button
+                                        className="button-base button-primary flex-1"
+                                        onClick={(e) => {
+                                            const input = e.target.parentElement.querySelector('input');
+                                            handleSaveTitle(input.value);
+                                        }}
+                                    >
+                                        Save
+                                    </button>
+                                    <button
+                                        className="button-base button-secondary flex-1"
+                                        onClick={() => setShowSaveModal(false)}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Toast Notification */}
+                    {toast && <div className="toast">{toast}</div>}
+                </div>
+            );
+        };
+
+        // ============================================================================
+        // RENDER APP
+        // ============================================================================
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<ScriptEditor />);
+    </script>
+</body>
+</html>
