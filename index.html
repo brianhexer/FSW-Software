@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Film Script Writer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #1a202c;
+            margin-bottom: 16px;
+            font-size: 42px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            font-size: 18px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
+        .features {
+            text-align: left;
+            margin: 40px 0;
+            color: #2d3748;
+        }
+        
+        .features li {
+            margin: 12px 0;
+            padding-left: 30px;
+            position: relative;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        .features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .cta-section {
+            margin: 40px 0;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 14px 40px;
+            margin: 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 16px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .btn-secondary:hover {
+            background: #f7fafc;
+        }
+        
+        .tech-stack {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 2px solid #e2e8f0;
+        }
+        
+        .tech-stack h3 {
+            color: #1a202c;
+            margin-bottom: 15px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .tech-badges {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .badge {
+            background: #edf2f7;
+            color: #2d3748;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Film Script Writer</h1>
+        <p class="subtitle">Professional-grade screenplay editor with industry-standard formatting</p>
+        
+        <ul class="features">
+            <li>Industry-standard screenplay formatting</li>
+            <li>Smart keyboard shortcuts & auto-formatting</li>
+            <li>Auto-save to browser storage</li>
+            <li>PDF export with perfect formatting</li>
+            <li>Scene navigation & statistics</li>
+            <li>100% client-side (no server needed)</li>
+        </ul>
+        
+        <div class="cta-section">
+            <a href="script-editor.html" class="btn btn-primary">Launch Editor →</a>
+            <a href="https://github.com/brianhexer/FSW-Software" class="btn btn-secondary">View on GitHub</a>
+        </div>
+        
+        <div class="tech-stack">
+            <h3>Built With</h3>
+            <div class="tech-badges">
+                <span class="badge">React 18</span>
+                <span class="badge">Tailwind CSS</span>
+                <span class="badge">Courier Prime</span>
+                <span class="badge">localStorage</span>
+                <span class="badge">html2pdf.js</span>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>📚 <a href="QUICK-START.md" style="color: #667eea; text-decoration: none;">Quick Start</a> • 
+               <a href="README.md" style="color: #667eea; text-decoration: none;">Documentation</a> • 
+               <a href="EXAMPLE-SCRIPT.md" style="color: #667eea; text-decoration: none;">Example Script</a></p>
+            <p style="margin-top: 20px; color: #a0aec0;">Built with ❤️ for screenwriters</p>
+        </div>
+    </div>
+</body>
+</html>
