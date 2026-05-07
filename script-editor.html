@@ -11,6 +11,68 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.14);
+            --glass-bg-strong: rgba(255, 255, 255, 0.22);
+            --glass-border: rgba(255, 255, 255, 0.26);
+            --glass-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+            --ink: #e0f2fe;
+            --ink-muted: rgba(224, 242, 254, 0.72);
+            --accent: #7dd3fc;
+            --accent-strong: #38bdf8;
+        }
+
+        html, body {
+            min-height: 100%;
+            background:
+                radial-gradient(circle at 18% 18%, rgba(56, 189, 248, 0.34), transparent 24%),
+                radial-gradient(circle at 82% 14%, rgba(125, 211, 252, 0.18), transparent 22%),
+                radial-gradient(circle at 50% 86%, rgba(99, 102, 241, 0.22), transparent 28%),
+                linear-gradient(135deg, #06101d 0%, #10233f 48%, #081120 100%);
+            color: var(--ink);
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        #root {
+            min-height: 100vh;
+        }
+
+        .glass-shell {
+            position: relative;
+            min-height: 100vh;
+            backdrop-filter: blur(18px) saturate(1.2);
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            backdrop-filter: blur(22px) saturate(1.25);
+        }
+
+        .glass-panel-strong {
+            background: var(--glass-bg-strong);
+            border: 1px solid rgba(255, 255, 255, 0.34);
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.22);
+            backdrop-filter: blur(26px) saturate(1.35);
+        }
+
+        .glass-sheen {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-sheen::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(255, 255, 255, 0.22), transparent 36%, rgba(255, 255, 255, 0.08) 70%, transparent);
+            pointer-events: none;
+        }
         
         * {
             font-family: 'Courier Prime', monospace;
@@ -20,7 +82,7 @@
             font-family: 'Courier Prime', monospace;
             font-size: 12pt;
             line-height: 1.5;
-            background: #f5f5f5;
+            background: transparent;
         }
         
         .script-line {
@@ -88,21 +150,27 @@
             font-size: 12pt;
             line-height: 1.5;
             resize: none;
-            background: white;
+            background: rgba(255, 255, 255, 0.11);
             border: none;
-            padding: 40px 20px;
+            border-radius: 28px;
+            padding: 28px 28px 40px;
+            color: #f8fafc;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+            caret-color: var(--accent);
         }
         
         .editor-textarea:focus {
             outline: none;
-            background: white;
+            background: rgba(255, 255, 255, 0.16);
         }
         
         .sidebar {
-            background: #2d3748;
-            color: #e2e8f0;
+            background: rgba(8, 15, 28, 0.36);
+            color: var(--ink);
             overflow-y: auto;
             max-height: 100vh;
+            backdrop-filter: blur(24px) saturate(1.25);
+            border-right: 1px solid rgba(255, 255, 255, 0.12);
         }
         
         .scene-item {
@@ -113,45 +181,42 @@
         }
         
         .scene-item:hover {
-            background: #4a5568;
-            border-left-color: #0066cc;
+            background: rgba(255, 255, 255, 0.12);
+            border-left-color: var(--accent);
         }
         
         .scene-item.active {
-            background: #4a5568;
+            background: rgba(125, 211, 252, 0.16);
             border-left-color: #fbbf24;
         }
         
         .character-suggestion {
             padding: 8px 12px;
             cursor: pointer;
-            background: #f0f4f8;
-            border-bottom: 1px solid #e2e8f0;
+            background: rgba(15, 23, 42, 0.06);
+            border-bottom: 1px solid rgba(15, 23, 42, 0.08);
             transition: background 0.2s;
         }
         
         .character-suggestion:hover {
-            background: #e8ecf1;
+            background: rgba(56, 189, 248, 0.14);
         }
 
         .automation-panel {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 320px;
-            max-height: 240px;
+            width: 100%;
+            max-height: 180px;
             overflow-y: auto;
-            background: rgba(255, 255, 255, 0.98);
-            border: 1px solid #cbd5e0;
-            border-radius: 10px;
-            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
-            z-index: 30;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 20px;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
+            backdrop-filter: blur(20px) saturate(1.25);
         }
 
         .automation-panel-title {
             padding: 10px 12px;
-            border-bottom: 1px solid #e2e8f0;
-            color: #475569;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            color: rgba(255, 255, 255, 0.78);
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 0.08em;
@@ -167,16 +232,16 @@
         .automation-action {
             padding: 8px 10px;
             border-radius: 9999px;
-            border: 1px solid #cbd5e1;
-            background: #f8fafc;
-            color: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.12);
+            color: #f8fafc;
             font-size: 11px;
             cursor: pointer;
             transition: all 0.2s ease;
         }
 
         .automation-action:hover {
-            background: #e2e8f0;
+            background: rgba(125, 211, 252, 0.22);
         }
         
         .format-badge {
@@ -214,59 +279,64 @@
         }
         
         .stats-bar {
-            background: #f8f9fa;
-            border-top: 1px solid #e9ecef;
+            background: rgba(255, 255, 255, 0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
             padding: 12px 20px;
             font-size: 11px;
-            color: #6c757d;
+            color: var(--ink-muted);
         }
         
         .button-base {
             padding: 8px 16px;
-            border-radius: 4px;
+            border-radius: 9999px;
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(14px) saturate(1.2);
         }
         
         .button-primary {
-            background: #0066cc;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.96), rgba(59, 130, 246, 0.92));
             color: white;
         }
         
         .button-primary:hover {
-            background: #0052a3;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(56, 189, 248, 0.25);
         }
         
         .button-secondary {
-            background: #e9ecef;
-            color: #495057;
+            background: rgba(255, 255, 255, 0.12);
+            color: #f8fafc;
         }
         
         .button-secondary:hover {
-            background: #dee2e6;
+            background: rgba(255, 255, 255, 0.2);
         }
         
         .button-danger {
-            background: #dc3545;
+            background: linear-gradient(135deg, rgba(248, 113, 113, 0.9), rgba(239, 68, 68, 0.9));
             color: white;
         }
         
         .button-danger:hover {
-            background: #c82333;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(239, 68, 68, 0.22);
         }
         
         .toast {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: #2d3748;
-            color: white;
+            background: rgba(15, 23, 42, 0.58);
+            color: #f8fafc;
             padding: 12px 20px;
-            border-radius: 4px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.2);
+            backdrop-filter: blur(16px) saturate(1.2);
             animation: slideIn 0.3s ease-out;
             z-index: 1000;
         }
@@ -288,48 +358,53 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(3, 7, 18, 0.48);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            backdrop-filter: blur(14px);
         }
         
         .modal {
-            background: white;
-            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 24px;
             padding: 24px;
             max-width: 500px;
             width: 90%;
-            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 24px 50px rgba(15, 23, 42, 0.28);
+            backdrop-filter: blur(20px) saturate(1.3);
         }
         
         .modal-title {
             font-size: 18px;
             font-weight: bold;
             margin-bottom: 16px;
-            color: #1a202c;
+            color: #f8fafc;
         }
         
         .modal-input {
             width: 100%;
             padding: 10px 12px;
-            border: 1px solid #cbd5e0;
-            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 14px;
             font-family: 'Courier Prime', monospace;
             font-size: 12px;
             margin-bottom: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #f8fafc;
         }
         
         .modal-input:focus {
             outline: none;
-            border-color: #0066cc;
-            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+            border-color: rgba(125, 211, 252, 0.65);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.14);
         }
         
         .pdf-page {
             width: 8.5in;
-            height: 11in;
+            min-height: 11in;
             padding: 1in;
             background: white;
             margin: 0 auto;
@@ -337,6 +412,12 @@
             font-size: 12pt;
             line-height: 1.5;
             page-break-after: always;
+            color: #111827;
+        }
+
+        .pdf-page * {
+            margin: 0;
+            box-sizing: border-box;
         }
     </style>
 </head>
@@ -525,8 +606,8 @@
 
         const SceneNavigator = ({ scenes, onSceneClick, currentLineIndex }) => {
             return (
-                <div className="sidebar w-64 flex flex-col">
-                    <div className="p-4 border-b border-gray-600">
+                <div className="sidebar glass-panel w-64 flex flex-col">
+                    <div className="p-4 border-b border-white/10">
                         <h2 className="text-sm font-bold uppercase tracking-wide">Scenes</h2>
                     </div>
                     <div className="flex-1 overflow-y-auto">
@@ -597,7 +678,11 @@
             // Parse script data
             const parsed = parseScript(scriptContent);
             const scenes = extractScenes(parsed);
-            const characters = extractCharacters(parsed);
+            const rawCharacters = extractCharacters(parsed);
+            const trailingLine = scriptContent.split('\n').pop().trim();
+            const characters = scriptContent.endsWith('\n') || !trailingLine
+                ? rawCharacters
+                : rawCharacters.filter((character) => character !== trailingLine.toUpperCase());
             const stats = getScriptStats(parsed);
 
             const getCurrentLineContext = (text) => {
@@ -889,7 +974,7 @@
                 const element = document.createElement('div');
                 element.className = 'pdf-page';
                 
-                let htmlContent = `<h1 style="text-align: center; margin-bottom: 2em; font-weight: bold; font-size: 16pt;">${escapeHtml(title)}</h1>`;
+                let htmlContent = `<div style="width: 100%; text-align: center; margin: 0 0 1.6in 0; font-weight: bold; font-size: 16pt; line-height: 1.2;">${escapeHtml(title)}</div>`;
                 
                 const lines = scriptContent.split('\n');
                 let previousFormat = FORMAT_TYPES.ACTION;
@@ -899,18 +984,19 @@
                     const formatted = applyFormatting(line, format);
                     const indent = getIndentation(format);
                     
-                    let htmlLine = escapeHtml(formatted) || '&nbsp;';
-                    let style = `margin-left: ${indent}in; margin-bottom: 0;`;
+                    const htmlLine = escapeHtml(formatted) || '&nbsp;';
+                    const indentPadding = `${indent}in`;
+                    let style = `display:block; width:100%; margin:0; padding-left:${indentPadding}; line-height:1.5; white-space:pre-wrap; box-sizing:border-box;`;
                     
                     switch (format) {
                         case FORMAT_TYPES.SCENE_HEADING:
-                            style += ' font-weight: bold; margin-top: 1.5em; margin-bottom: 0.5em;';
+                            style += ' font-weight: bold; margin-top: 0.3in; margin-bottom: 0.08in;';
                             break;
                         case FORMAT_TYPES.ACTION:
-                            style += ' margin-bottom: 0.5em;';
+                            style += ' margin-bottom: 0.08in;';
                             break;
                         case FORMAT_TYPES.CHARACTER:
-                            style += ' font-weight: bold; margin-top: 0.5em; margin-bottom: 0;';
+                            style += ' font-weight: bold; margin-top: 0.2in; margin-bottom: 0;';
                             break;
                         case FORMAT_TYPES.DIALOGUE:
                             style += ' margin-bottom: 0;';
@@ -919,11 +1005,11 @@
                             style += ' margin-bottom: 0;';
                             break;
                         case FORMAT_TYPES.TRANSITION:
-                            style += ' font-weight: bold; text-align: right; margin-top: 0.5em;';
+                            style += ' font-weight: bold; text-align: right; margin-top: 0.2in; padding-left: 0;';
                             break;
                     }
                     
-                    htmlContent += `<p style="${style}">${htmlLine}</p>`;
+                    htmlContent += `<div style="${style}">${htmlLine}</div>`;
                     
                     if (format !== FORMAT_TYPES.DIALOGUE && format !== FORMAT_TYPES.PARENTHETICAL) {
                         previousFormat = format;
@@ -933,7 +1019,7 @@
                 element.innerHTML = htmlContent;
                 
                 const opt = {
-                    margin: [0.5, 0.5, 0.5, 0.5],
+                    margin: [0.45, 0.45, 0.45, 0.45],
                     filename: `${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: { scale: 2 },
@@ -1010,7 +1096,7 @@
             // ================================================================
 
             return (
-                <div className="flex h-screen bg-gray-100">
+                <div className="glass-shell flex h-screen">
                     {/* Scene Navigator Sidebar */}
                     <SceneNavigator
                         scenes={scenes}
@@ -1019,12 +1105,12 @@
                     />
 
                     {/* Main Content Area */}
-                    <div className="flex-1 flex flex-col">
+                    <div className="flex-1 flex flex-col min-w-0">
                         {/* Header */}
-                        <div className="bg-white border-b border-gray-300 px-6 py-4 flex items-center justify-between shadow-sm">
+                        <div className="glass-panel glass-sheen px-6 py-4 flex items-center justify-between border-x-0 border-t-0 rounded-none">
                             <div className="flex items-center gap-4">
-                                <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
-                                <span className="text-xs text-gray-500 px-2 py-1 bg-gray-100 rounded">
+                                <h1 className="text-2xl font-bold text-slate-50">{title}</h1>
+                                <span className="text-xs text-sky-100 px-2 py-1 rounded-full border border-white/15 bg-white/10">
                                     {isDirty ? 'Editing...' : 'Saved'}
                                 </span>
                             </div>
@@ -1060,11 +1146,14 @@
                         </div>
 
                         {/* Editor Area */}
-                        <div className="flex-1 overflow-hidden relative">
-                            <div className="automation-panel">
-                                <div className="automation-panel-title">Automation</div>
-                                <div className="p-3 space-y-3">
-                                    <div className="automation-actions">
+                        <div className="flex-1 overflow-hidden min-w-0">
+                            <div className="glass-panel glass-sheen mx-4 mt-4 rounded-3xl overflow-hidden">
+                                <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between gap-4">
+                                    <div>
+                                        <div className="automation-panel-title border-0 p-0 mb-1">Automation</div>
+                                        <div className="text-xs text-sky-100/70">Free helpers for formatting, cleanup, and character memory.</div>
+                                    </div>
+                                    <div className="automation-actions justify-end">
                                         <button className="automation-action" onClick={handleAutoFormatClick}>
                                             Auto Format Script
                                         </button>
@@ -1075,8 +1164,10 @@
                                                 if (!editor) return;
                                                 const cursorPos = editor.selectionStart;
                                                 const text = editor.value;
-                                                const beforeCursor = text.substring(0, cursorPos);
-                                                const currentLine = beforeCursor.split('\n').pop() || '';
+                                                const lineStart = text.lastIndexOf('\n', cursorPos - 1) + 1;
+                                                const lineEndIndex = text.indexOf('\n', cursorPos);
+                                                const lineEnd = lineEndIndex === -1 ? text.length : lineEndIndex;
+                                                const currentLine = text.slice(lineStart, lineEnd);
                                                 const currentFormat = detectFormat(currentLine, selectedFormat);
 
                                                 if (currentFormat !== FORMAT_TYPES.CHARACTER) {
@@ -1085,7 +1176,7 @@
                                                 }
 
                                                 const normalized = currentLine.trim().toUpperCase();
-                                                const updated = text.substring(0, cursorPos - currentLine.length) + normalized + text.substring(cursorPos);
+                                                const updated = text.slice(0, lineStart) + normalized + text.slice(lineEnd);
                                                 editor.value = updated;
                                                 setScriptContent(updated);
                                                 setIsDirty(true);
@@ -1095,19 +1186,28 @@
                                             Normalize Character
                                         </button>
                                     </div>
-
-                                    <div className="border-t border-slate-200 pt-2">
-                                        <div className="text-[11px] uppercase tracking-wider text-slate-500 font-bold mb-2">
+                                </div>
+                                <div className="px-4 py-4 grid gap-4 md:grid-cols-[1fr_260px]">
+                                    <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                                        <div className="text-[11px] uppercase tracking-wider text-sky-100/80 font-bold mb-2">
+                                            Automated Cleanup
+                                        </div>
+                                        <div className="text-xs text-sky-50/70 leading-relaxed">
+                                            Trims trailing spaces, collapses extra blank lines, and normalizes character names from the current script memory.
+                                        </div>
+                                    </div>
+                                    <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                                        <div className="text-[11px] uppercase tracking-wider text-sky-100/80 font-bold mb-2">
                                             Character Memory
                                         </div>
                                         {showCharacterSuggestionsPanel ? (
-                                            <div className="rounded-lg border border-slate-200 overflow-hidden">
+                                            <div className="rounded-xl border border-white/10 overflow-hidden bg-slate-950/20">
                                                 {characterSuggestions.slice(0, 5).map((character, index) => (
                                                     <button
                                                         key={character}
                                                         type="button"
-                                                        className={`w-full text-left px-3 py-2 text-sm border-b border-slate-100 last:border-b-0 ${
-                                                            index === activeSuggestionIndex ? 'bg-blue-50 text-blue-700' : 'bg-white text-slate-700'
+                                                        className={`w-full text-left px-3 py-2 text-sm border-b border-white/5 last:border-b-0 ${
+                                                            index === activeSuggestionIndex ? 'bg-sky-300/20 text-sky-50' : 'bg-transparent text-sky-50/80'
                                                         }`}
                                                         onMouseDown={(event) => {
                                                             event.preventDefault();
@@ -1119,13 +1219,14 @@
                                                 ))}
                                             </div>
                                         ) : (
-                                            <div className="text-xs text-slate-500 leading-relaxed">
-                                                Type a character line to auto-suggest remembered names. Use Ctrl+Shift+F to normalize the full script.
+                                            <div className="text-xs text-sky-50/70 leading-relaxed">
+                                                Remembered character names will appear here while you write.
                                             </div>
                                         )}
                                     </div>
                                 </div>
                             </div>
+                            <div className="px-4 pt-4 h-[calc(100%-11rem)]">
                             <textarea
                                 ref={editorRef}
                                 value={scriptContent}
@@ -1133,14 +1234,15 @@
                                 onKeyDown={handleKeyDown}
                                 onClick={handleCursorMove}
                                 onKeyUp={handleCursorMove}
-                                className="editor-textarea w-full h-full"
+                                className="editor-textarea glass-panel w-full h-full"
                                 placeholder="Start writing your script here...&#10;&#10;Tips:&#10;• Type INT. or EXT. to start a scene heading&#10;• Character names in ALL CAPS&#10;• Press Enter after character to auto-format dialogue&#10;• Use Tab for smart indentation&#10;• Ctrl+P to export PDF&#10;• Ctrl+Shift+S to save with title"
                                 spellCheck="false"
                             />
+                            </div>
                         </div>
 
                         {/* Statistics Footer */}
-                        <div className="stats-bar flex items-center justify-between">
+                        <div className="stats-bar glass-panel flex items-center justify-between text-sky-50/80 border-x-0 border-b-0 rounded-none">
                             <div className="flex gap-6">
                                 <span>📄 Pages: ~{stats.pages}</span>
                                 <span>📍 Scenes: {stats.scenes}</span>
